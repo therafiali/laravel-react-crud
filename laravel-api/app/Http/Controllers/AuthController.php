@@ -56,7 +56,7 @@ class AuthController extends Controller
 
 
     public function profile(Request $request)
-    {
+    {   
 
         $validator = Validator::make($request->all(), [
             "name" => "required",
@@ -83,5 +83,13 @@ class AuthController extends Controller
 
 
         return response()->json($input);
+    }
+
+
+
+    public function getMe(Request $request)
+    {
+        $user = Auth::user();
+        return response()->json([$user]);
     }
 }
