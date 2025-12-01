@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import type { Post } from "../types/Post";
 import postService from "../services/postService";
+import AuthService from "../services/AuthService";
 
 export default function Post() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [name, setName] = useState("");
 
   // Form state
   const [form, setForm] = useState<Omit<Post, "id">>({
     title: "",
-    body: ""
+    body: "",
   });
 
   const [editId, setEditId] = useState<number | null>(null);
@@ -17,38 +19,40 @@ export default function Post() {
   // Fetch All
   const loadPosts = () => {
     setLoading(true);
-    postService.getAll()
+    postService
+      .getAll()
       .then((res) => setPosts(res.data))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
+    getCurrentUser();
     loadPosts();
   }, []);
 
   // Handle Input Change
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   // CREATE
   const handleCreate = () => {
-    postService.create(form)
-      .then(() => {
-        loadPosts();
-        setForm({ title: "", body: "" });
-      });
+    postService.create(form).then(() => {
+      loadPosts();
+      setForm({ title: "", body: "" });
+    });
   };
 
   // UPDATE
   const handleUpdate = () => {
-      if (!editId) return;
-      postService.update(editId, form)
-        .then(() => {
-          loadPosts();
-          setForm({ title: "", body: "" });
-          setEditId(null);
-        });
+    if (!editId) return;
+    postService.update(editId, form).then(() => {
+      loadPosts();
+      setForm({ title: "", body: "" });
+      setEditId(null);
+    });
   };
 
   // DELETE
@@ -62,8 +66,15 @@ export default function Post() {
       setEditId(id);
       setForm({
         title: res.data.title,
-        body: res.data.body
+        body: res.data.body,
       });
+    });
+  };
+
+  const getCurrentUser = () => {
+    AuthService.getMe().then((res) => {
+      console.log(res.data[0].name);
+      setName(res.data[0].name);
     });
   };
 
@@ -71,6 +82,7 @@ export default function Post() {
 
   return (
     <div style={{ width: "600px", margin: "auto" }}>
+      <h2>Welcome {name}</h2>
       <h2>Post CRUD</h2>
 
       {/* FORM */}
@@ -95,7 +107,10 @@ export default function Post() {
 
         {editId ? (
           <>
-            <button onClick={handleUpdate} style={{ padding: "8px 15px", marginRight: 10 }}>
+            <button
+              onClick={handleUpdate}
+              style={{ padding: "8px 15px", marginRight: 10 }}
+            >
               Update
             </button>
             <button
@@ -123,7 +138,7 @@ export default function Post() {
             border: "1px solid #ccc",
             padding: 10,
             marginBottom: 10,
-            borderRadius: 5
+            borderRadius: 5,
           }}
         >
           <h3>{p.title}</h3>
@@ -133,7 +148,10 @@ export default function Post() {
             Edit
           </button>
 
-          <button onClick={() => handleDelete(p.id)} style={{ background: "red", color: "white" }}>
+          <button
+            onClick={() => handleDelete(p.id)}
+            style={{ background: "red", color: "white" }}
+          >
             Delete
           </button>
         </div>

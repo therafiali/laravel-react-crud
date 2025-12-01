@@ -35,6 +35,10 @@ class AuthService {
   updateProfile(data: ProfileInput) {
     return api.post("/profile", data);
   }
+
+  getMe (){
+    return api.get("/me")
+  }
 }
 
 export default new AuthService();

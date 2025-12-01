@@ -26,7 +26,7 @@ function App() {
 
         {/* Example: make post protected or public */}
         <Route
-          path="/post"
+          path="/"
           element={
             <ProtectedRoute>
               <Post />
