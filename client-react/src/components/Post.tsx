@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import type { Post } from "../types/Post";
 import postService from "../services/postService";
 import AuthService from "../services/AuthService";
+import LangChange from "./LangChange";
+import InvoiceForm from "./InvoiceForm";
 
 export default function Post() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -85,6 +87,8 @@ export default function Post() {
       <h2>Welcome {name}</h2>
       <h2>Post CRUD</h2>
 
+      <LangChange />
+
       {/* FORM */}
       <div style={{ marginBottom: 20, padding: 15, border: "1px solid #aaa" }}>
         <h3>{editId ? "Update Post" : "Create Post"}</h3>
@@ -156,6 +160,8 @@ export default function Post() {
           </button>
         </div>
       ))}
+
+      <InvoiceForm />
     </div>
   );
 }
