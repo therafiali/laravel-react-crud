@@ -1,4 +1,5 @@
-import api from "../api/axios";
+
+import { api } from "../api/axios";
 import type { Post } from "../types/Post";
 
 class PostService {
