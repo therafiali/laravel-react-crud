@@ -1,49 +1,68 @@
 import { useState } from "react";
-import AuthService from "../../services/AuthService";
+import { useAuth } from "../../context/AuthContext";
 
+const RegisterPage = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const { register, loading } = useAuth();
 
-export default function Register() {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmed_password: "",
-  });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
 
-  const [message, setMessage] = useState("");
-
-  const handleChange = (e: any) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleRegister = () => {
-    AuthService.register(form)
-      .then((res) => {
-        localStorage.setItem("token", res.data.token);
-        setMessage("Account created!");
-      })
-      .catch((err) => setMessage("Registration failed"));
+    const result = await register({ name, email, password });
+    if (!result.success) {
+      setError(result.error);
+    }
   };
 
   return (
-    <div className="flex flex-col w-3/4 mx-auto p-8" >
+    <div style={{ maxWidth: "400px", margin: "100px auto", padding: "20px" }}>
       <h2>Register</h2>
-
-      <input name="name" placeholder="Name"
-        value={form.name} onChange={handleChange} />
-
-      <input name="email" placeholder="Email"
-        value={form.email} onChange={handleChange} />
-
-      <input name="password" type="password" placeholder="Password"
-        value={form.password} onChange={handleChange} />
-
-      <input name="confirmed_password" type="password"
-        placeholder="Confirm Password"
-        value={form.confirmed_password} onChange={handleChange} />
-
-      <button onClick={handleRegister}>Register</button>
-
-      {message && <p>{message}</p>}
+      {error && (
+        <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>
+      )}
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
+          required
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
+          required
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            width: "100%",
+            padding: "10px",
+            cursor: loading ? "not-allowed" : "pointer",
+          }}
+        >
+          {loading ? "Registering..." : "Register"}
+        </button>
+      </form>
     </div>
   );
-}
+};
+
+export default RegisterPage;

@@ -1,22 +1,36 @@
-import axios from "axios";
+import axios, { type InternalAxiosRequestConfig } from "axios";
+import { TokenManager } from "../utils/TokenManager";
 
-const api = axios.create({
-  baseURL: "http://localhost:8000/api",
+
+export const api = axios.create({
+  baseURL: 'http://localhost:8000/api/v1',
   headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json",
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
   },
+  // withCredentials: true
 });
 
+// Request Interceptor - Attach token
+api.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const token = TokenManager.getToken();
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-// Attach token automatically
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Response Interceptor - Handle 401 errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      TokenManager.removeToken();
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
   }
-  return config;
-});
-
-
-export default api;
+);

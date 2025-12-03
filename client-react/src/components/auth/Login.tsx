@@ -1,56 +1,83 @@
-import { useState } from "react";
-import AuthService from "../../services/AuthService";
-import { useNavigate } from "react-router-dom";
+import React, { useState, type ChangeEvent, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
-export default function Login() {
+
+export const Login: React.FC = () => {
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const { login, loading } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
 
-  const [message, setMessage] = useState("");
-
-  const handleChange = (e: any) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleLogin = () => {
-    AuthService.login(form)
-      .then((res) => {
-        if (res.data.error) {
-          console.log(res.data.error);
-           setMessage(res.data.error?.[0]);
-          return
-        }
-        localStorage.setItem("token", res.data.token);
-        setMessage("Login successful!");
-        navigate("/");
-      })
-      .catch(() => setMessage("Invalid credentials"));
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError('');
+    
+    const result = await login({ email, password });
+    if (result.success) {
+      navigate('/');
+    } else {
+      setError(result.error || 'Login failed');
+    }
   };
 
   return (
-    <div className="flex flex-col w-3/4 p-8">
+    <div style={{ maxWidth: '400px', margin: '100px auto', padding: '20px' }}>
       <h2>Login</h2>
-
-      <input
-        name="email"
-        placeholder="Email"
-        value={form.email}
-        onChange={handleChange}
-      />
-
-      <input
-        name="password"
-        type="password"
-        placeholder="Password"
-        value={form.password}
-        onChange={handleChange}
-      />
-
-      <button onClick={handleLogin}>Login</button>
-
-      {message && <p>{message}</p>}
+      {error && (
+        <div style={{ 
+          color: 'red', 
+          marginBottom: '10px', 
+          padding: '10px', 
+          backgroundColor: '#fee', 
+          borderRadius: '4px' 
+        }}>
+          {error}
+        </div>
+      )}
+      <form onSubmit={handleSubmit}>
+        <div style={{ marginBottom: '15px' }}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+            style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
+            required
+          />
+        </div>
+        <div style={{ marginBottom: '15px' }}>
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+            style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
+            required
+          />
+        </div>
+        <button 
+          type="submit" 
+          disabled={loading}
+          style={{ 
+            width: '100%', 
+            padding: '10px', 
+            borderRadius: '4px',
+            border: 'none',
+            backgroundColor: '#007bff',
+            color: 'white',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.6 : 1
+          }}
+        >
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
+      </form>
+      <p style={{ marginTop: '15px', textAlign: 'center' }}>
+        Don't have an account? <Link to="/register">Register</Link>
+      </p>
     </div>
   );
-}
+};
+
