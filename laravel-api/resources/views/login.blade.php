@@ -11,7 +11,6 @@
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
         <a href="{{ route('auth.google') }}" class="btn btn-primary">Sign in with Google</a>
-
     </div>
 </body>
 </html>
